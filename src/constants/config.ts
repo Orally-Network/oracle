@@ -18,8 +18,15 @@ export default {
 
   THE_GRAPH_URL: import.meta.env.VITE_THE_GRAPH_URL,
 
+  sybilCansiters: [
+    'wth3l-tiaaa-aaaap-aa5uq-cai',
+    'xywyw-qiaaa-aaaad-aaema-cai',
+    'tysiw-qaaaa-aaaak-qcikq-cai',
+  ],
+
   pythia_canister_id: isStaging ? 'xmz4o-gqaaa-aaaag-qcjva-cai' : 'ettff-uaaaa-aaaag-abpcq-cai',
   sybil_canister_id: isStaging ? 'tysiw-qaaaa-aaaak-qcikq-cai' : 'wth3l-tiaaa-aaaap-aa5uq-cai',
+  // sybil_canister_id: isStaging ? 'xywyw-qiaaa-aaaad-aaema-cai' : 'wth3l-tiaaa-aaaap-aa5uq-cai',
   apollo_canister_id: isStaging ? 'ndeka-riaaa-aaaak-afmaq-cai' : 'iuq3c-pqaaa-aaaag-qdcva-cai',
 
   weatherSource1Key: import.meta.env.VITE_WEATHER_SOURCE_1_KEY,

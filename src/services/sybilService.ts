@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { type Address, type Hash } from 'viem';
-import sybilCanister from 'Canisters/sybilCanister';
+import { useSybilCanister } from 'Canisters/sybilCanister';
 import { GeneralResponse } from 'Interfaces/common';
 import { remove0x } from 'Utils/addressUtils';
 import { useGlobalState } from 'Providers/GlobalState';
 import logger from 'Utils/logger';
 import { DEFAULT_DOMAIN_LIMIT_PER_DAY } from 'Constants/ui';
 import { type AllowedChain } from 'Interfaces/common';
+import { useApiKeyStore } from 'Stores/useApiKeyStore';
 
 import { okOrErrResponseWrapper, toastWrapper } from './utils';
 
@@ -34,9 +35,11 @@ export type ApiKey = Omit<AllowedDomain, 'domain'> & {
 // query
 export const useFetchApiKeys = () => {
   const { addressData } = useGlobalState();
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
 
   return useQuery({
-    queryKey: ['apiKeys', addressData],
+    queryKey: ['apiKeys', addressData, selectedCanister],
     queryFn: async () => {
       try {
         const promise = sybilCanister.get_api_keys(
@@ -80,9 +83,11 @@ export const useFetchApiKeys = () => {
 // query
 export const useFetchAllowedDomains = () => {
   const { addressData } = useGlobalState();
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
 
   return useQuery({
-    queryKey: ['allowedDomains', addressData],
+    queryKey: ['allowedDomains', addressData, selectedCanister],
     queryFn: async () => {
       try {
         const promise = sybilCanister.get_allowed_domains(
@@ -124,6 +129,7 @@ export const useFetchAllowedDomains = () => {
 export const useGenerateApiKey = () => {
   const { addressData } = useGlobalState();
   const queryClient = useQueryClient();
+  const sybilCanister = useSybilCanister();
 
   return useMutation({
     mutationFn: async () => {
@@ -152,6 +158,7 @@ export const useGenerateApiKey = () => {
 export const useGrantDomain = () => {
   const { addressData } = useGlobalState();
   const queryClient = useQueryClient();
+  const sybilCanister = useSybilCanister();
 
   return useMutation({
     mutationFn: async (domain: string) => {
@@ -180,9 +187,12 @@ export const useGrantDomain = () => {
 
 // todo: add to tokens coin of the chain + change transfer for this case
 // query
-export const useFetchAllowedChains = () =>
-  useQuery({
-    queryKey: ['allowedChains'],
+export const useFetchAllowedChains = () => {
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
+
+  return useQuery({
+    queryKey: ['allowedChains', selectedCanister],
     queryFn: async () => {
       try {
         const res: any = await sybilCanister.get_allowed_chains();
@@ -208,11 +218,15 @@ export const useFetchAllowedChains = () =>
       return;
     },
   });
+};
 
 // query
-export const useFetchSybilTreasureAddress = () =>
-  useQuery({
-    queryKey: ['treasureAddress'],
+export const useFetchSybilTreasureAddress = () => {
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
+
+  return useQuery({
+    queryKey: ['treasureAddress', selectedCanister],
     queryFn: async () => {
       try {
         const res: Address = (await sybilCanister.get_treasure_address()) as Address;
@@ -227,11 +241,13 @@ export const useFetchSybilTreasureAddress = () =>
       return;
     },
   });
+};
 
 // mutate
 export const useDeposit = () => {
   const { addressData } = useGlobalState();
   const queryClient = useQueryClient();
+  const sybilCanister = useSybilCanister();
 
   return useMutation({
     mutationFn: async ({ chainId, tx_hash }: { chainId: number; tx_hash: Hash }) => {
@@ -266,9 +282,11 @@ export const useDeposit = () => {
 // query
 export const useFetchBalance = () => {
   const { addressData } = useGlobalState();
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
 
   return useQuery({
-    queryKey: ['balance', addressData.address],
+    queryKey: ['balance', addressData.address, selectedCanister],
     queryFn: async () => {
       try {
         const promise = sybilCanister.get_balance(addressData.address) as Promise<GeneralResponse>;
@@ -290,9 +308,12 @@ export const useFetchBalance = () => {
 };
 
 // query
-export const useFetchBaseFee = () =>
-  useQuery({
-    queryKey: ['baseFee'],
+export const useFetchBaseFee = () => {
+  const sybilCanister = useSybilCanister();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
+
+  return useQuery({
+    queryKey: ['baseFee', selectedCanister],
     queryFn: async () => {
       try {
         const res = (await sybilCanister.get_base_fee()) as bigint;
@@ -307,11 +328,13 @@ export const useFetchBaseFee = () =>
       return;
     },
   });
+};
 
 // mutate
 export const useDeleteApiKey = () => {
   const { addressData } = useGlobalState();
   const queryClient = useQueryClient();
+  const sybilCanister = useSybilCanister();
 
   return useMutation({
     mutationFn: async (apiKey: string) => {
@@ -339,6 +362,7 @@ export const useDeleteApiKey = () => {
 export const useBanDomain = () => {
   const { addressData } = useGlobalState();
   const queryClient = useQueryClient();
+  const sybilCanister = useSybilCanister();
 
   return useMutation({
     mutationFn: async (domain: string) => {

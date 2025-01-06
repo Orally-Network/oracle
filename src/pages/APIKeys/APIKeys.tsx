@@ -12,6 +12,7 @@ import { SybilTopUp } from 'Shared/SybilTopUp';
 import { KeysTable } from './KeysTable';
 import { DomainsTable } from './DomainsTable';
 import { Example } from './Example';
+import { CanisterSelector } from './CanisterSelector';
 
 export const APIKeys = () => {
   const { width } = useWindowDimensions();
@@ -38,6 +39,8 @@ export const APIKeys = () => {
           </div>
 
           <Flex align="center" justify="space-between" gap={8} vertical={isMobile}>
+            <CanisterSelector />
+
             <SybilBalance />
 
             <AuthorizedActions>
