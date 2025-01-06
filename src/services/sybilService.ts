@@ -6,7 +6,6 @@ import { GeneralResponse } from 'Interfaces/common';
 import { remove0x } from 'Utils/addressUtils';
 import { useGlobalState } from 'Providers/GlobalState';
 import logger from 'Utils/logger';
-import { DEFAULT_DOMAIN_LIMIT_PER_DAY } from 'Constants/ui';
 import { type AllowedChain } from 'Interfaces/common';
 import { useApiKeyStore } from 'Stores/useApiKeyStore';
 
@@ -80,51 +79,6 @@ export const useFetchApiKeys = () => {
   });
 };
 
-// query
-export const useFetchAllowedDomains = () => {
-  const { addressData } = useGlobalState();
-  const sybilCanister = useSybilCanister();
-  const selectedCanister = useApiKeyStore.use.selectedCanister();
-
-  return useQuery({
-    queryKey: ['allowedDomains', addressData, selectedCanister],
-    queryFn: async () => {
-      try {
-        const promise = sybilCanister.get_allowed_domains(
-          addressData.message,
-          remove0x(addressData.signature),
-        ) as Promise<GeneralResponse>;
-        const wrappedPromise = okOrErrResponseWrapper(promise);
-
-        const res = await wrappedPromise;
-
-        // formatter
-        const allowedDomains: AllowedDomain[] = res.map(([domain, domainData]: any) => {
-          return {
-            key: domain,
-            domain,
-            ownerAddress: domainData.grantor_address,
-            lastRequest: domainData.last_request,
-            requestCount: Number(domainData.request_count),
-            requestCountPerMethod: domainData.request_count_per_method,
-            requestLimit: Number(domainData.request_limit),
-            requestCountToday: Number(domainData.request_count_today),
-          };
-        });
-
-        logger.log('[service] queried allowed domains', { res, allowedDomains });
-
-        return allowedDomains;
-      } catch (error) {
-        logger.error('[service] Failed to query allowed domains', error);
-      }
-
-      return;
-    },
-    enabled: Boolean(addressData && addressData.signature),
-  });
-};
-
 // mutate
 export const useGenerateApiKey = () => {
   const { addressData } = useGlobalState();
@@ -150,37 +104,6 @@ export const useGenerateApiKey = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
-    },
-  });
-};
-
-// mutate
-export const useGrantDomain = () => {
-  const { addressData } = useGlobalState();
-  const queryClient = useQueryClient();
-  const sybilCanister = useSybilCanister();
-
-  return useMutation({
-    mutationFn: async (domain: string) => {
-      const promise = sybilCanister.grant(
-        domain,
-        [DEFAULT_DOMAIN_LIMIT_PER_DAY],
-        addressData.message,
-        remove0x(addressData.signature),
-      ) as Promise<GeneralResponse>;
-      const wrappedPromise = okOrErrResponseWrapper(promise);
-
-      const res = await toastWrapper(wrappedPromise, 'Grant Domain');
-
-      console.log('[service] granted domain', { res });
-
-      return res;
-    },
-    onError: (error, variables, context) => {
-      logger.error(`[service] Failed to grant domain`, error, variables, context);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allowedDomains'] });
     },
   });
 };
@@ -354,34 +277,6 @@ export const useDeleteApiKey = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
-    },
-  });
-};
-
-// mutate
-export const useBanDomain = () => {
-  const { addressData } = useGlobalState();
-  const queryClient = useQueryClient();
-  const sybilCanister = useSybilCanister();
-
-  return useMutation({
-    mutationFn: async (domain: string) => {
-      const promise = sybilCanister.restrict(
-        domain,
-        addressData.message,
-        remove0x(addressData.signature),
-      );
-      const res = await toastWrapper(promise, 'Ban Domain');
-
-      logger.log('[service] ban domain', { res });
-
-      return res;
-    },
-    onError: (error: any, variables: any, context: any) => {
-      logger.error(`[service] Failed to ban domain`, error, variables, context);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allowedDomains'] });
     },
   });
 };

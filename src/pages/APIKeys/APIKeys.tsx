@@ -10,7 +10,6 @@ import ROUTES from 'Constants/routes';
 
 import { SybilTopUp } from 'Shared/SybilTopUp';
 import { KeysTable } from './KeysTable';
-import { DomainsTable } from './DomainsTable';
 import { Example } from './Example';
 import { CanisterSelector } from './CanisterSelector';
 
@@ -55,10 +54,6 @@ export const APIKeys = () => {
 
         <div className="my-5">
           <KeysTable />
-        </div>
-
-        <div className="my-5">
-          <DomainsTable />
         </div>
       </div>
     </>
