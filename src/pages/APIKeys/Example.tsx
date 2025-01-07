@@ -1,12 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Select, SelectItem, Card, CardFooter, Switch, Snippet, Link } from '@nextui-org/react';
 
-import config from 'Constants/config';
+// import config from 'Constants/config';
 import { useApiKeyStore } from 'Stores/useApiKeyStore';
 import { useFetchApiKeys } from 'Services/sybilService';
 
 // https://tysiw-qaaaa-aaaak-qcikq-cai.icp0.io/get_xrc_data_with_proof?id=DOGE/LINK
-const host = `https://${config.sybil_canister_id}.icp0.io/`;
+// const host = `https://${config.sybil_canister_id}.icp0.io/`;
 
 const feeds = [
   {
@@ -38,18 +38,28 @@ const feeds = [
 
 const methods = [
   {
-    key: 'get_xrc_data_with_proof',
-    label: 'get_xrc_data_with_proof',
+    key: 'get_dxr_data_batch',
+    label: 'get_dxr_data_batch',
   },
   {
-    key: 'read_logs_with_proof',
-    label: 'read_logs_with_proof',
+    key: 'get_dxr_data_batch_with_proof',
+    label: 'get_dxr_data_batch_with_proof',
   },
-  {
-    key: 'read_contract_with_proof',
-    label: 'read_contract_with_proof',
-  },
+  // {
+  //   key: 'get_xrc_data_with_proof',
+  //   label: 'get_xrc_data_with_proof',
+  // },
+  // {
+  //   key: 'read_logs_with_proof',
+  //   label: 'read_logs_with_proof',
+  // },
+  // {
+  //   key: 'read_contract_with_proof',
+  //   label: 'read_contract_with_proof',
+  // },
 ];
+
+const getDxrDataBatchExtraFields = ['chain_id', 'pool_addresses[]', 'dex_type'];
 
 const readLogsExtraFields = ['chain_id', 'block_from', 'block_to', 'topics', 'limit', 'addresses'];
 
@@ -65,9 +75,11 @@ const readContractExtraFields = [
 export const Example = () => {
   const selectedApiKey = useApiKeyStore.use.selectedApiKey();
   const updateSelectedApiKey = useApiKeyStore.use.updateSelectedApiKey();
+  const selectedCanister = useApiKeyStore.use.selectedCanister();
+  const host = `https://${selectedCanister}.icp0.io/`;
   const { data: apiKeys } = useFetchApiKeys();
 
-  const [feed, setFeed] = useState<string>(feeds[0].key);
+  const [feed] = useState<string>(feeds[0].key);
   const [method, setMethod] = useState<string>(methods[0].key);
   const [bytes, setBytes] = useState<boolean>(true);
   const [cacheTtl, setCacheTtl] = useState<boolean>(true);
@@ -89,34 +101,37 @@ export const Example = () => {
     }
   }, [apiKeys, selectedApiKey]);
 
-  const selectedFeed = useMemo(() => [feed], [feed]);
+  // const selectedFeed = useMemo(() => [feed], [feed]);
   const selectedMethod = useMemo(() => [method], [method]);
 
   const codeString = useMemo(() => {
+    console.log({ method, getDxrDataBatchExtraFields });
     if (method === 'get_xrc_data_with_proof') {
       return `${host}${method}?id=${feed}${selectedApiKey ? `&api_key=${selectedApiKey}` : ''}${bytes ? `&bytes=true` : ''}${cacheTtl ? `&cache_ttl=1800` : ''}`;
     } else if (method === 'read_logs_with_proof') {
       return `${host}${method}?${readLogsExtraFields.map((field) => `${field}={}`).join('&')}${selectedApiKey ? `&api_key=${selectedApiKey}` : ''}${bytes ? `&bytes=true` : ''}${cacheTtl ? `&cache_ttl=1800` : ''}`;
     } else if (method === 'read_contract_with_proof') {
       return `${host}${method}?${readContractExtraFields.map((field) => `${field}={}`).join('&')}${selectedApiKey ? `&api_key=${selectedApiKey}` : ''}${bytes ? `&bytes=true` : ''}${cacheTtl ? `&cache_ttl=1800` : ''}`;
+    } else if (method === 'get_dxr_data_batch_with_proof') {
+      return `${host}${method}?${getDxrDataBatchExtraFields.map((field) => `${field}={}`).join('&')}${selectedApiKey ? `&api_key=${selectedApiKey}` : ''}${bytes ? `&bytes=true` : ''}${cacheTtl ? `&cache_ttl=1800` : ''}`;
     }
 
     return '';
-  }, [method, feed, selectedApiKey, bytes, cacheTtl]);
+  }, [host, method, feed, selectedApiKey, bytes, cacheTtl]);
 
   return (
     <Card isFooterBlurred radius="lg" className="border-none">
       <div className="p-4 flex-col">
         <div className="flex gap-4 justify-center">
-          <Select
-            items={feeds}
-            label="Feed Id"
-            className="w-36"
-            selectedKeys={selectedFeed}
-            onChange={handleSelectionChange(feeds, setFeed)}
-          >
-            {(feed) => <SelectItem key={feed.key}>{feed.label}</SelectItem>}
-          </Select>
+          {/*<Select*/}
+          {/*  items={feeds}*/}
+          {/*  label="Feed Id"*/}
+          {/*  className="w-36"*/}
+          {/*  selectedKeys={selectedFeed}*/}
+          {/*  onChange={handleSelectionChange(feeds, setFeed)}*/}
+          {/*>*/}
+          {/*  {(feed) => <SelectItem key={feed.key}>{feed.label}</SelectItem>}*/}
+          {/*</Select>*/}
 
           <Select
             items={methods}
@@ -157,6 +172,12 @@ export const Example = () => {
             ))}
           {method === 'read_contract_with_proof' &&
             readContractExtraFields.map((field) => (
+              <span key={field}>
+                &{field}={'{}'}
+              </span>
+            ))}
+          {method.includes('get_dxr_data_batch') &&
+            getDxrDataBatchExtraFields.map((field) => (
               <span key={field}>
                 &{field}={'{}'}
               </span>
