@@ -1,27 +1,25 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Button, Progress, Tooltip, type TableProps } from '@nextui-org/react';
-import { formatUnits } from 'viem';
+import { Button, type TableProps, Snippet } from '@nextui-org/react';
 
 import { useGlobalState } from 'Providers/GlobalState';
 import { Table, type Column } from 'Components/Table';
 import { DeleteIcon } from 'SVGICons/DeleteIcon';
 import { Modal, useModal } from 'Components/Modal';
-import { type ApiKey, type AllowedDomain, useFetchBaseFee } from 'Services/sybilService';
-import { BALANCE_USD_DECIMALS } from 'Utils/balance';
+import { type ApiKey, useFetchBaseFee } from 'Services/sybilService';
 
 const columns: Column[] = [
   {
     key: 'requestCount',
     label: 'Requests',
   },
-  {
-    key: 'spent',
-    label: 'Spent',
-  },
-  {
-    key: 'limit',
-    label: 'Limit (1d)',
-  },
+  // {
+  //   key: 'spent',
+  //   label: 'Spent',
+  // },
+  // {
+  //   key: 'limit',
+  //   label: 'Limit (1d)',
+  // },
   {
     key: 'actions',
     label: 'Actions',
@@ -62,26 +60,34 @@ export const SybilTable = ({
   const { data: baseFee, isLoading: isFeeLoading } = useFetchBaseFee();
 
   const renderCell = useCallback(
-    (item: ApiKey | AllowedDomain, columnKey: string) => {
+    (item: ApiKey, columnKey: string) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       const cellValue = item[columnKey];
 
       switch (columnKey) {
-        case 'spent':
-          return item.requestCount && baseFee
-            ? `$${formatUnits(BigInt(item.requestCount) * baseFee, BALANCE_USD_DECIMALS)}`
-            : 0;
-        case 'limit':
+        case 'apiKey':
           return (
-            <Tooltip content={`${item.requestCountToday}/${item.requestLimit}`}>
-              <Progress
-                aria-label="Loading..."
-                value={item.requestCountToday}
-                maxValue={item.requestLimit}
-              />
-            </Tooltip>
+            <div>
+              <Snippet symbol="" className="truncate">
+                {item.apiKey}
+              </Snippet>
+            </div>
           );
+        // case 'spent':
+        //   return item.requestCount && baseFee
+        //     ? `$${formatUnits(BigInt(item.requestCount) * baseFee, BALANCE_USD_DECIMALS)}`
+        //     : 0;
+        // case 'limit':
+        //   return (
+        //     <Tooltip content={`${item.requestCountToday}/${item.requestLimit}`}>
+        //       <Progress
+        //         aria-label="Loading..."
+        //         value={item.requestCountToday}
+        //         maxValue={item.requestLimit}
+        //       />
+        //     </Tooltip>
+        //   );
         case 'actions':
           return (
             <div className="flex items-center text-center">
