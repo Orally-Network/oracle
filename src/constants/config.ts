@@ -19,8 +19,8 @@ export default {
   THE_GRAPH_URL: import.meta.env.VITE_THE_GRAPH_URL,
 
   sybilCansiters: [
-    'wth3l-tiaaa-aaaap-aa5uq-cai',
     'xywyw-qiaaa-aaaad-aaema-cai',
+    'wth3l-tiaaa-aaaap-aa5uq-cai',
     'tysiw-qaaaa-aaaak-qcikq-cai',
   ],
 
